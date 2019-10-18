@@ -13,7 +13,7 @@ Advertencia, necesitas navegar en el log de git para ver los cambios y el por qu
 
 ## instrucciones
 
-En la recién creada carpeta src colocaremos el código del [repo](https://github.com/siht/node_api_test) con la instrucción (la rama master es perfectamente funcional)
+En la recién creada carpeta src colocaremos el código del [repo](https://github.com/siht/node_api_test) (la rama master es perfectamente funcional) con la instrucción
 
 ```bash
 cd src
