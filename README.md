@@ -19,3 +19,14 @@ En la recién creada carpeta src colocaremos el código del [repo](https://githu
 cd src
 git clone https://github.com/siht/node_api_test.git
 ```
+
+## siguiente paso (esta descripción se va a borrar)
+
+crear un dockerfile para crear el ambiente para la aplicación. Se usará una imagen de node:alpine
+
+necesitamos construir la imagen con la tag (o nombre de la imagen) node_app_api
+
+```bash
+# esto estará en nuestro archivo start_app.sh
+docker build -t node_app_api .
+```
