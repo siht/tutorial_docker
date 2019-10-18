@@ -22,11 +22,15 @@ git clone https://github.com/siht/node_api_test.git
 
 ## siguiente paso (esta descripción se va a borrar)
 
-una vez creada la imagen se necesitan dos contenedores, uno con la base de datos (mongo) y otro con la aplicación (node_app_api)
+crearemos la red en común de tipo bridge (la default) con el fin de que nuestros contenedores puedan encontrarse por nombre (el cual tampoco fue definido y a continuación lo haremos) y añadiremos la opción network también
 
 ```bash
-docker run -d node_app_api
-docker run -d mongo:4.0.3
+docker network create red_comun
+
+## docker run -d node_app_api # -d detached o background
+## docker run -d mongo:4.0.3 # -d detached o background
+docker run -d --name api --network red_comun node_app_api
+docker run -d --name db --network red_comun mongo:4.0.3
 ```
 
-a pesar de que corren, no hay manera de conectarlos, necesitan una red en común
+de esta manera ambos contenedores pertenecen a la misma red y se pueden encontrar via dns con su nombre de contenedor (api y db)
