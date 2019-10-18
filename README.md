@@ -22,11 +22,11 @@ git clone https://github.com/siht/node_api_test.git
 
 ## siguiente paso (esta descripción se va a borrar)
 
-crear un dockerfile para crear el ambiente para la aplicación. Se usará una imagen de node:alpine
-
-necesitamos construir la imagen con la tag (o nombre de la imagen) node_app_api
+una vez creada la imagen se necesitan dos contenedores, uno con la base de datos (mongo) y otro con la aplicación (node_app_api)
 
 ```bash
-# esto estará en nuestro archivo start_app.sh
-docker build -t node_app_api .
+docker run -d node_app_api
+docker run -d mongo:4.0.3
 ```
+
+a pesar de que corren, no hay manera de conectarlos, necesitan una red en común
