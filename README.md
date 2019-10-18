@@ -22,15 +22,32 @@ git clone https://github.com/siht/node_api_test.git
 
 ## siguiente paso (esta descripción se va a borrar)
 
-crearemos la red en común de tipo bridge (la default) con el fin de que nuestros contenedores puedan encontrarse por nombre (el cual tampoco fue definido y a continuación lo haremos) y añadiremos la opción network también
+la aplicación api tiene algunas variables de entorno, todas con un valor por default en el código de el api
 
-```bash
-docker network create red_comun
-
-## docker run -d node_app_api # -d detached o background
-## docker run -d mongo:4.0.3 # -d detached o background
-docker run -d --name api --network red_comun node_app_api
-docker run -d --name db --network red_comun mongo:4.0.3
+```node
+// archivo src/node_api_test/server.js
+...
+  port = process.env.PORT || 3000,
+...
+  process.env.MONGO || 'mongodb://localhost:27017/Profile',
 ```
 
-de esta manera ambos contenedores pertenecen a la misma red y se pueden encontrar via dns con su nombre de contenedor (api y db)
+o sin valor por default
+
+```node
+//archivo src/node_api_test/otherUrls/uploadImages.js
+...
+    {storage: ImgurStorage({ 'clientId': process.env.IMGUR_CLIENT_ID})}
+...
+```
+
+mirando detenidamente hay dos variables interesantes MONGO que al estar vacía el valor default es mongodb://localhost:27017/Profile, lo cual al tratar de conectarse dará un error
+
+vamos a modificar la línea de el contenedor de la aplicación agregando la flag "-e" (environment) para agregar la cadena de conexión y el puerto de respuesta de la aplicación (no me gusta el 3000) y la variable IMGUR_CLIENT_ID no se definirá porque no es necesaria para este ejemplo.
+
+```bash
+# hay que notar que la cadena de conexión de mongo se usa el nombre "db" que es el nombre
+# del contenedor de mongo (recuerda ponerlo porque docker los nombra por default con un nombre aleatorio)
+## docker run -d --name api --network red_comun node_app_api
+docker run -d --name api --network red_comun -e "MONGO=mongodb://db:27017/Profile" -e "PORT=8000" node_app_api
+```

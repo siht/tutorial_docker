@@ -2,8 +2,6 @@
 
 docker build -t node_app_api .
 
-# generar contenedores
-# se les define un nombre porque al generar un nuevo contenedor cambia su dirección ip
-# dentro de la red interna de docker
-docker run -d --name api --network red_comun node_app_api
+# se agregan también variables de entorno 
+docker run -d --name api --network red_comun -e "MONGO=mongodb://db:27017/Profile" -e "PORT=8000" node_app_api
 docker run -d --name db --network red_comun mongo:4.0.3
