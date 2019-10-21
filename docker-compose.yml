@@ -12,9 +12,9 @@ services:
     depends_on:
       - db
     environment:
-      MONGO: mongodb://db:27017/Profile
-      IMGUR_CLIENT_ID: un_valor_x
-      PORT: 8000
+      MONGO: ${MONGO}
+      IMGUR_CLIENT_ID: ${IMGUR_CLIENT_ID}
+      PORT: ${PORT}
     ports:
       - 8000:8000
 volumes:

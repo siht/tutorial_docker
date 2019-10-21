@@ -13,18 +13,34 @@ Advertencia, necesitas navegar en el log de git para ver los cambios y el por qu
 
 ## instrucciones
 
-En la recién creada carpeta src colocaremos el código del [repo](https://github.com/siht/node_api_test) (la rama master es perfectamente funcional) con la instrucción
+El siguiente paso es de mejora, puesto que a todos nos han enseñado que la información sensible jamás debe viajar por internet, debemos usar variables de entorno, docker-compose autmáticamente carga el archivo ".env" que esté junto a al docker-compose.yml, así que agregaremos ese archivo con este contenido
 
-```bash
-cd src
-git clone https://github.com/siht/node_api_test.git
+```
+# este es el contenido del archivo ".env"
+MONGO=mongodb://db:27017/Profile
+IMGUR_CLIENT_ID=un_valor_x
+PORT=8000
 ```
 
-## siguiente paso (esta descripción se va a borrar)
+y modificaremos la parte de las variables de entorno de docker-compose.yml
 
-en el paso anterior sólo nos faltó modificar el Dockerfile, ya que este cambia el contexto también deberemos cambiar la instrucción copy
+```yaml
+MONGO: mongodb://db:27017/Profile
+IMGUR_CLIENT_ID: un_valor_x
+PORT: 8000
+```
 
-```Dockerfile
-## COPY ./src/node_api_test /app
-COPY . /app
+por
+
+```yaml
+MONGO: ${MONGO}
+IMGUR_CLIENT_ID: ${IMGUR_CLIENT_ID}
+PORT: ${PORT}
+```
+
+y añadiremos un .gitignore
+
+```gitignore
+.env
+
 ```
