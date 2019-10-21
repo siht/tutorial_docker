@@ -12,7 +12,15 @@ services:
     depends_on:
       - db
     env_file: .env_api
+  reverse_proxy:
+    image: diouxx/apache-proxy
     ports:
-      - 8000:8000
+      - 80:80
+    volumes:
+      - ./conf/dev_sites.conf:/opt/proxy-conf/sites.conf
+    depends_on:
+      - db
+      - api
+
 volumes:
   mongo_data:
