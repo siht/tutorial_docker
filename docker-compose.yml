@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  db:
+  api:
+
+volumes:
+  mongo_data:
