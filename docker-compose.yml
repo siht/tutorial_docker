@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  db:
+    image: mongo:4.0.10
+    volumes:
+      - mongo_data:/data/db
+  api:
+    build:
+      context: ./src/node_api_test
+      dockerfile: ../../Dockerfile
+    depends_on:
+      - db
+    env_file: .env_api
+  reverse_proxy:
+    image: diouxx/apache-proxy
+    ports:
+      - 80:80
+    volumes:
+      - ./conf/dev_sites.conf:/opt/proxy-conf/sites.conf
+    depends_on:
+      - db
+      - api
+
+volumes:
+  mongo_data:
