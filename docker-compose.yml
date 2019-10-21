@@ -2,6 +2,9 @@ version: '3'
 
 services:
   db:
+    image: mongo:4.0.10
+    volumes:
+      - mongo_data:/data/db
   api:
 
 volumes:

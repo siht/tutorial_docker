@@ -22,10 +22,9 @@ git clone https://github.com/siht/node_api_test.git
 
 ## siguiente paso (esta descripción se va a borrar)
 
-como acabas de ver es sólo para levantar 2 contenedores ya es una carga visiblemente grande, a pesar de que se automatiza el proceso, tal vez un script bash no es la mejor solución, hay herramientas dedicadas a este tipo de tareas como make. Sin embargo, se ha creado una herramienta que tiene todos estos atajos ya creados: docker-compose
+En este paso ya tenemos nuestro docker-compose.yml ahora vamos a definir nuestra base de datos
 
-vamos a reemplazar nuestro amado bash en un archivo docker-compose.yml, empezaremos por la versión que queremos usar de nuestro docker-compose (la versión 3 estará bien).
-Definir lo que necesitamos, services (o instancias de imágenes, contenedores para los cuates) que involucran una base de datos que llamaremos db y una aplicacion que llamaremos api, volumes (volúmenes) en este caso uno para la base de datos, en este caso no definiremos una network ya que el docker-compose define una por default que se llama "default" y todos los contenedores dentro del docker-compose están dentro de esa red
+versión antigua
 
 ```yml
 version: '3'
@@ -38,4 +37,35 @@ volumes:
   mongo_data:
 ```
 
-para este punto aun no podemos correr el docker compose porque falta definir exactamente los servicios, mientras que los volumenes y las redes a están configuradas, esto se hará en el siguiente paso.
+versión con db definida
+
+```yaml
+version: '3'
+
+services:
+  db:
+    image: mongo:4.0.10
+    volumes:
+      - mongo_data:/data/db
+  api:
+
+volumes:
+  mongo_data:
+```
+
+como vemos la diferencia entre como habíamos definido el contenedor de la base de datos
+
+```bash
+docker run -d --name db --network red_comun -v mongo_data:/data/db mongo:4.0.3
+```
+
+vs compose
+
+```yaml
+  db:
+    image: mongo:4.0.10
+    volumes:
+      - mongo_data:/data/db
+```
+
+mucho más legible
