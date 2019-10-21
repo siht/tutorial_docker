@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  db:
+    image: mongo:4.0.10
+    volumes:
+      - mongo_data:/data/db
+  api:
+    build:
+      context: ./src/node_api_test
+      dockerfile: ../../Dockerfile
+    depends_on:
+      - db
+    environment:
+      MONGO: mongodb://db:27017/Profile
+      IMGUR_CLIENT_ID: un_valor_x
+      PORT: 8000
+    ports:
+      - 8000:8000
+volumes:
+  mongo_data:

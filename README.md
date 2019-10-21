@@ -22,87 +22,139 @@ git clone https://github.com/siht/node_api_test.git
 
 ## siguiente paso (esta descripción se va a borrar)
 
-perfecto, sólo falta agregar un volumen para persistir los datos de la base de datos, si reconstruyes las imagenes de las bases de datos debes reconstruir los contenedores, eso quiere decir que también los datos son nuevos (se borra todo).
+En este paso ya tenemos nuestra base de datos ahora vamos a definir nuestra api
 
-Los contenedores son un conjunto de programas y datos todo en uno, pero como son un sistema linux veremos a los volúmenes como un dispositivo en linux que se tiene que montar [recurso online](https://blog.carreralinux.com.ar/2016/07/montar-dispositivos-de-almacenamiento-linux/) (si el recurso no está disponible buscar comando mount o "archivo /etc/fstab").
+versión antigua
 
-recuerda que hay dos tipos de volúmenes de tipo interno y externo:
+```yaml
+version: '3'
 
-- interno, los maneja docker y puedes administrarlos mediante el comando "docker volume"
-- externo, pertenece a tu sistema de ficheros y puedes acceder como cualquier directorio o archivo
-
-**IMPORTANTE**
-**en versiones antiguas de docker no existian volúmenes y se creaban contenedores de datos (por si te encuentras con una receta sin volúmenes pero con contenedores extra)**
-
-Después de toda esa explicación antes de poner a correr el contenedor de la base de datos primero detén y elimina los contenedores, ejecuta en la consola el siguiente comando
-
-```bash
-$ docker stop api db # detener ejecución de contenedores
-$ docker rm api db # eliminar los contenedores actuales
+services:
+  db:
+    image: mongo:4.0.10
+    volumes:
+      - mongo_data:/data/db
+  api:
+volumes:
+  mongo_data:
 ```
 
-Por cierto, estos comandos son útiles y podríamos tenerlos en un archivo, pero de momento es suficiente que conozcas estos comandos.
+versión con api definida
 
-Ahora en el archivo start_app crearemos un volumen para la base de datos justo antes de tener a los contenedores funcionando
+```yaml
+version: '3'
 
-```bash
-...
-docker network create red_comun
-
-docker volume create mongo_data
-
-docker run -d --name api --netw ...
-...
+services:
+  db:
+    image: mongo:4.0.10
+    volumes:
+      - mongo_data:/data/db
+  api:
+    build:
+      context: ./src/node_api_test
+      dockerfile: ../../Dockerfile
+    depends_on:
+      - db
+volumes:
+  mongo_data:
 ```
 
-Ahora revisaremos la documentación de la [imagen de mongo](https://hub.docker.com/_/mongo) y nos fijaremos en la sección "Where to Store Data" y nos fijamos que tiene una línea que configura el contenedor con un volumen externo
+como nuestra aplicación es "construida" (por eso hay que añadir build) por un dockerfile, necesitamos decirle desde donde va a tomar los recursos (context) y si el dockerfile no esta dentro del contexto, especificar donde se encuentra tomando como referencia el contexto, además especificar si hay dependencias a otrso contenedores.
+
+desde este momento, nuestro status es que ya podemos correr nuestra receta de docker-compose, de hecho ya incluimos todos los pasos que incluimos en el script bash.
+
+podemos construir todo antes de correr las aplicaciones
 
 ```bash
-$ docker run --name some-mongo -v /my/own/datadir:/data/db -d mongo
+# ejecutar en el directorio donde está el docker-compose.yml
+$ docker-compose build
+# o construir por servicio
+$ docker-compose build api
+# varios servicios
+$ docker-compose build api db
 ```
-de donde podemos observar que los datos son guardados en "/data/db", podemos usar el volumen antes creado o usar un volumen externo, pero yo lo haré con el volumen interno así que nuestra línea del contenedor de mongo quedará así
+
+pero si lo haces por primera ocasión, no necesitas especificar la contrucción, automáticamente se construirán
 
 ```bash
-## docker run -d --name db --network red_comun mongo:4.0.3
-docker run -d --name db --network red_comun -v mongo_data:/data/db mongo:4.0.3
+$ docker-compose up
+# o construir explícitamente
+$ docker-compose up --build
 ```
 
-si ya habías iniciado antes este script deberás borrar los contenedores, los volúmenes y las redes
+al correr la aplicación esta no correrá porque faltan las variables de entorno, no necesitamos reconstruir las imagenes, sólo hay que eliminar los contenedores:
 
 ```bash
-$ docker stop api db
-$ docker rm api db
-$ docker volume rm mongo_data
-$ docker network rm red_comun
+$ docker-compose down # para y elimina los contenedores
 ```
 
-por último
+modificamos nuestro docker-compose.yml
+
+
+```yaml
+version: '3'
+
+services:
+  db:
+    image: mongo:4.0.10
+    volumes:
+      - mongo_data:/data/db
+  api:
+    build:
+      context: ./src/node_api_test
+      dockerfile: ../../Dockerfile
+    depends_on:
+      - db
+    environment:
+      MONGO: mongodb://db:27017/Profile
+      IMGUR_CLIENT_ID: un_valor_x
+      PORT: 8000
+volumes:
+  mongo_data:
+```
+
+el cual si correrá, como no se hizo cambio en el dockerfile no es necesario construir una nueva imagen
 
 ```bash
-$ sh start_app.sh
+$ docker-compose up
 ```
 
-ahora nuestra aplicación está corriendo por el puerto 8000 y las rutas que usaremos para visualizar su funcionamiento son
+pero el navegador no nos mostrará resultados, porque no añadimos la directiva ports en el servicio de api, reescribiremos
 
-- /profile/new
-- /profiles
+```yaml
+version: '3'
 
-entraremos a [localhost:8000/profiles](http://localhost:8000/profiles) y veremos que no hay respuesta (lo correcto es que nod iera un array vacío), esto se debe a que en el bash inicia primero el contenedor de la api y después el de la base de datos, lo arreglaremos simplemente reiniciando el contenedor de la api.
+services:
+  db:
+    image: mongo:4.0.10
+    volumes:
+      - mongo_data:/data/db
+  api:
+    build:
+      context: ./src/node_api_test
+      dockerfile: ../../Dockerfile
+    depends_on:
+      - db
+    environment:
+      MONGO: mongodb://db:27017/Profile
+      IMGUR_CLIENT_ID: un_valor_x
+      PORT: 8000
+    ports:
+      - 8000:8000
+volumes:
+  mongo_data:
+```
+
+y correremos estos comando una vez más:
 
 ```bash
-$ docker restart api
+$ docker-compose down
+$ docker-compose up
 ```
 
-y ahora si responderá adecuadamente con ([] array vacío), esto lo podemos probar con cualquier navegador o usando "curl"
+ahora nuestra aplicación está corriendo perfectamente
 
 ```bash
-$ curl http://localhost:8000/profiles
+$ curl localhost:8000/profiles
+$ curl -d '{"nombre":"haku", "titulo":"dios sin nombre", "descripcion": "aparece en el viaje de chihiro"}' -H "Content-Type: application/json" -X POST http://localhost:8000//profile/new
 ```
-
-ahora usaremos también curl (o postman) para ingresar un registro
-
-```bash
-$ curl -d '{"nombre":"haku", "titulo":"dios sin nombre", "descripcion":"aparece en el viaje de chihiro"}' -H "Content-Type: application/json" -X POST http://localhost:8000/profile/new
-```
-
-volveremos a usar [localhost:8000/profiles](http://localhost:8000/profiles) y veremos nuestro registro finalmente.
