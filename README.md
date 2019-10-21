@@ -31,3 +31,11 @@ y el archivo ".env" lo renombraremos a ".env_api" y al archivo docker-compose.ym
     #   PORT: ${PORT}
     env_file: .env_api
 ```
+
+a veces tendremos problemas al iniciar la aplicación api, pero si esto sucede, sólo hay que reiniciar la aplicación, lo más seguro es que la base de datos aun no esté correctamente inicializada y no pueda conectarse otra vez
+
+Este comando hará la magia
+
+```bash
+$ docker-compose restart 
+```
