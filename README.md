@@ -13,34 +13,21 @@ Advertencia, necesitas navegar en el log de git para ver los cambios y el por qu
 
 ## instrucciones
 
-El siguiente paso es de mejora, puesto que a todos nos han enseñado que la información sensible jamás debe viajar por internet, debemos usar variables de entorno, docker-compose autmáticamente carga el archivo ".env" que esté junto a al docker-compose.yml, así que agregaremos ese archivo con este contenido
+por el momento ese .env está bien, pero procuraremos usarlo sólo para cosas relacionadas a configuración de docker, para las aplicaciones colocaremos su propio archivo ".env"
 
-```
-# este es el contenido del archivo ".env"
-MONGO=mongodb://db:27017/Profile
-IMGUR_CLIENT_ID=un_valor_x
-PORT=8000
-```
-
-y modificaremos la parte de las variables de entorno de docker-compose.yml
-
-```yaml
-MONGO: mongodb://db:27017/Profile
-IMGUR_CLIENT_ID: un_valor_x
-PORT: 8000
-```
-
-por
-
-```yaml
-MONGO: ${MONGO}
-IMGUR_CLIENT_ID: ${IMGUR_CLIENT_ID}
-PORT: ${PORT}
-```
-
-y añadiremos un .gitignore
+modificaremos el gitignore para que no lea cualquier archivo que comience por 
 
 ```gitignore
-.env
+.env*
 
+```
+
+y el archivo ".env" lo renombraremos a ".env_api" y al archivo docker-compose.yml en la parte de environment lo remplazaremos
+
+```yaml
+    # environment:
+    #   MONGO: ${MONGO}
+    #   IMGUR_CLIENT_ID: ${IMGUR_CLIENT_ID}
+    #   PORT: ${PORT}
+    env_file: .env_api
 ```

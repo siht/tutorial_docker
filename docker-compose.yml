@@ -11,10 +11,7 @@ services:
       dockerfile: ../../Dockerfile
     depends_on:
       - db
-    environment:
-      MONGO: ${MONGO}
-      IMGUR_CLIENT_ID: ${IMGUR_CLIENT_ID}
-      PORT: ${PORT}
+    env_file: .env_api
     ports:
       - 8000:8000
 volumes:
